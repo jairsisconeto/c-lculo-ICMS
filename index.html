@@ -3,57 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de ICMS-ST | Gestão Varejo</title>
+    <title>TaxFlow Varejo | Calculadora de ICMS-ST</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f7f6; padding: 20px; }
-        .container { max-width: 400px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: auto; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; margin-top: 20px; cursor: pointer; }
-        .result { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-left: 5px solid #28a745; display: none; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f7f6; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container { 
+            max-width: 450px; 
+            width: 90%;
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+        h2 { color: #333; margin-top: 0; border-bottom: 2px solid #28a745; padding-bottom: 10px; }
+        label { display: block; margin-top: 15px; font-weight: 600; color: #555; font-size: 0.9rem; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 1rem;
+        }
+        input:focus { border-color: #28a745; outline: none; box-shadow: 0 0 5px rgba(40,167,69,0.2); }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            margin-top: 25px; 
+            font-size: 1rem; 
+            font-weight: bold;
+            cursor: pointer; 
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #218838; }
+        
+        .result { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background-color: #f8f9fa; 
+            border-left: 6px solid #28a745; 
+            border-radius: 4px;
+            display: none; 
+        }
+        .result p { margin: 10px 0; font-size: 1.1rem; color: #333; }
+        .destaque-percentual {
+            color: #e67e22; /* Laranja para destaque de atenção fiscal */
+            font-weight: bold;
+            margin-left: 5px;
+            font-size: 1.2rem;
+        }
+        .valor-final { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Calculadora ST</h2>
+    <h2>TaxFlow Varejo</h2>
     
     <label>Valor do Produto (R$)</label>
-    <input type="number" id="valor" value="755.14" step="0.01">
+    <input type="number" id="valor" placeholder="Ex: 755.14" step="0.01">
     
     <label>Alíquota Interestadual (%)</label>
-    <input type="number" id="aliqInter" value="12">
+    <input type="number" id="aliqInter" placeholder="Ex: 12" value="12">
     
     <label>MVA (%)</label>
-    <input type="number" id="mva" value="30.37" step="0.01">
+    <input type="number" id="mva" placeholder="Ex: 30.37" step="0.01">
     
     <label>Alíquota Interna Destino (%)</label>
-    <input type="number" id="aliqInterna" value="19">
+    <input type="number" id="aliqInterna" placeholder="Ex: 19" value="19">
     
     <button onclick="calcular()">Calcular Imposto</button>
 
     <div id="resultado" class="result">
-        <p><strong>Crédito ICMS:</strong> R$ <span id="resCredito"></span></p>
-        <p><strong>ICMS-ST a Pagar:</strong> R$ <span id="resST"></span></p>
-        <p><strong>Custo Final:</strong> R$ <span id="resCusto"></span></p>
+        <p>Crédito ICMS: <strong>R$ <span id="resCredito"></span></strong></p>
+        <p>ICMS-ST a Pagar: <strong>R$ <span id="resST"></span></strong></p>
+        <hr>
+        <p class="valor-final">Custo Final: R$ <span id="resCusto"></span></p>
     </div>
 </div>
 
 <script>
     function calcular() {
+        // Captura dos valores
         const valor = parseFloat(document.getElementById('valor').value);
         const aliqInter = parseFloat(document.getElementById('aliqInter').value) / 100;
         const mva = parseFloat(document.getElementById('mva').value) / 100;
         const aliqInterna = parseFloat(document.getElementById('aliqInterna').value) / 100;
 
+        // Validação simples
+        if (isNaN(valor) || isNaN(mva)) {
+            alert("Por favor, preencha o valor do produto e o MVA.");
+            return;
+        }
+
+        // Lógica Fiscal
         const credito = valor * aliqInter;
         const baseST = valor * (1 + mva);
         const st = (baseST * aliqInterna) - credito;
         const custoTotal = valor + st;
+        const percAcrescimo = (st / valor) * 100;
 
-        document.getElementById('resCredito').innerText = credito.toFixed(2);
-        document.getElementById('resST').innerText = st.toFixed(2);
-        document.getElementById('resCusto').innerText = custoTotal.toFixed(2);
+        // Exibição dos resultados com destaques
+        document.getElementById('resCredito').innerText = credito.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        document.getElementById('resST').innerHTML = `
+            ${st.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} 
+            <span class="destaque-percentual">(${percAcrescimo.toFixed(1)}%)</span>
+        `;
+        
+        document.getElementById('resCusto').innerText = custoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        // Mostrar div de resultado
         document.getElementById('resultado').style.display = 'block';
     }
 </script>
